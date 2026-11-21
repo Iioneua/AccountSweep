@@ -92,6 +92,8 @@ The tool starts every sweep in **Basic**. It mentions Advanced only as a one-lin
 accountsweep/
   crates/
     core/          # model, SQLite store, sources, grouping, rules, HIBP, GDELT, recipes, state machine
+      schemas/     # JSON Schemas (tool ↔ agent contract), embedded in the binary
+      tests/fixtures/{valid,invalid}/  # examples every schema must accept / reject
     cli/           # binary "accountsweep": clap, human output, --agent output contract
     tui/           # ratatui review + approval screen
     # web/         # v0.2: local review page (axum on 127.0.0.1), hardened per §11.1
@@ -103,7 +105,6 @@ accountsweep/
       browser-read.md     # how to read connections/devices pages and pipe them in
       browser-act.md      # how to execute an action card, stop rules
       troubleshooting.md
-  schemas/         # JSON Schemas for --agent output, ingest input, approval, recipes
   docs/
   .claude-plugin/  # install the skill in Claude Code from the repo
   .github/workflows/
@@ -338,7 +339,7 @@ Thin on purpose. It contains:
 | Browser actions | The user's own browser profile (no credentials handled by the tool or agent); visible window; hard stops at sign-in/2FA/CAPTCHA/payment/final delete | — |
 | Audit log | Append-only table protected by triggers + **hash chain** (each row stores SHA-256 of the previous row) so tampering is detectable; `log --verify` checks it | SHA-256 hash chain |
 | Logging | `tracing` with a redaction layer; secrets types can't be formatted; debug logs off by default | `tracing` |
-| Dependencies | `Cargo.lock` committed, `cargo deny` (licenses, bans, sources) + `cargo audit` (RustSec) in CI, Dependabot, minimal dependency set | RustSec |
+| Dependencies | `Cargo.lock` committed, `cargo deny` (RustSec advisories, licenses, bans, sources) in CI, Dependabot, minimal dependency set | RustSec |
 | CI | GitHub Actions pinned to commit SHAs, least-privilege `permissions:`, gitleaks, GitHub secret scanning + push protection | OpenSSF Scorecard practices |
 | Releases | Reproducible builds where possible, SHA-256 checksums, **GitHub artifact attestations** (SLSA build provenance, Sigstore-backed) | SLSA, Sigstore |
 | Installing the tool | Basic: agent downloads the release asset over HTTPS and verifies its SHA-256 before running it. Advanced: also `gh attestation verify` | SHA-256; SLSA, Sigstore |
