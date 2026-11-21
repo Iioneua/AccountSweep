@@ -1,0 +1,10 @@
+# gitleaks configuration: default rules plus a narrow allowlist for obvious
+# placeholder values used in negative test fixtures.
+title = "AccountSweep gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Placeholder values in test fixtures (never real secrets)"
+regexes = ['''not-a-real-(password|token)''']
