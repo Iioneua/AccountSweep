@@ -6,7 +6,7 @@ Running record of project decisions. **[delegated]** = you said "you decide" (or
 
 - **P1 Code first:** anything deterministic is done by the tool, not by agent reasoning.
 - **P2 Basic is simple and inside the agent's environment:** no API keys, OAuth setup or multi-step user work by default; those are Advanced, opt-in per feature.
-- **P2b Keep data out of the agent wherever the mode allows:** the tool echoes only IDs, counts and short summaries; Advanced offers full bypass of the model.
+- **P2b Security sweet spot:** protections that cost the user nothing are always on (Basic). Secure-but-complicated protections are Advanced. Simple paths where the agent reads data are used in Basic after the user consents; the user trusts their AI provider with that data, and the AccountSweep project never receives it.
 - **P3 Most secure, well-known method per step:** use established standards and widely reviewed tools; no custom crypto or ad-hoc schemes (SPEC §11.1).
 
 ## Active
@@ -33,24 +33,29 @@ Running record of project decisions. **[delegated]** = you said "you decide" (or
 | D43 | **[delegated, P1]** CI enforces a token budget on `--agent` output for a fixture sweep | Makes P1 measurable |
 | D44 | **[delegated]** v0.1 targets local agents (Claude Code); claude.ai web deferred | It can't run the local binary |
 | D45 | **[delegated, P3]** OAuth per RFC 8252 + PKCE S256 + state; revoke per RFC 7009 | Standard for native apps |
-| D46 | **[delegated, P3]** Local DB encrypted with SQLCipher, key in the OS keychain | Account list is sensitive; SQLCipher is the established choice |
 | D47 | **[delegated, P3]** Audit log is a SHA-256 hash chain with `log --verify` | Tamper evidence with a well-known technique |
 | D48 | **[delegated, P3]** rustls + OS trust store, host allow-list, HTTPS only | Memory-safe TLS, no custom trust |
 | D49 | **[delegated, P3]** Local web review hardened per OWASP (127.0.0.1, token, Host/Origin checks, CSRF, CSP) | Prevents other local pages / DNS rebinding from driving it |
 | D50 | **[delegated, P3]** Supply chain: committed lockfile, cargo deny + cargo audit, SHA-pinned Actions, GitHub artifact attestations (SLSA provenance) | OpenSSF / SLSA practices |
 | D51 | **[delegated, P3]** `#![forbid(unsafe_code)]`, `secrecy`/`zeroize` for secrets in memory | Reduce memory-safety and leak risks |
 | D52 | TUI review only in v0.1; hardened local web page moves to v0.2 | Interview R6: smaller attack surface, ~2 weeks saved |
-| D54 | Confirmed: SQLCipher with key in keychain | Interview R6 |
 | D55 | Basic/Advanced split: Basic needs no keys, OAuth or multi-step user work; Advanced = own Gmail OAuth, HIBP key, password exports, TUI | User direction 2026-11-21 |
 | D56 | Basic Gmail = agent's Gmail connector running the tool's fixed, capped query pack (`connector_read`), piped to `ingest gmail_headers` | Simple, inside the agent env; tool still owns the logic |
 | D57 | Basic review/approval in chat: tool-made numbered list → user reply → `approve --chat` → tool read-back → explicit yes | No terminal needed |
 | D58 | The agent installs the binary itself (release download + SHA-256 / attestation check) | No setup steps for Basic users |
 | D59 | Milestones deliver the Basic path end to end first (M1–M3), Advanced after (M4–M5) | Basic is the main product |
+| D60 | Security sweet spot: free protections always on; complicated ones Advanced; agent-reads-data paths allowed in Basic after one recorded user consent | User direction 2026-11-21 |
+| D61 | Default build uses plain SQLite with user-only permissions + disk-encryption advice; SQLCipher is an Advanced build feature (`encrypted-db`, `db encrypt`) | Removes C crypto build dependency from Basic; encryption stays available |
+| D62 | Consent step at setup names what the AI provider sees and that the project receives nothing; `consent --show/--revoke` | User decides whom to trust |
+| D63 | Install check: SHA-256 in Basic; build attestation verification in Advanced | Needs `gh`, so it's an extra tool |
+| D64 | `MASTER_PROMPT.md` kept private (gitignored), removed from the published history | User request |
 
 ## Superseded
 
 | ID | Was | Replaced by |
 |---|---|---|
+| D54 | Confirmed: SQLCipher with key in keychain | D61 |
+| D46 | **[delegated, P3]** Local DB encrypted with SQLCipher, key in the OS keychain | D61 (SQLCipher is Advanced) |
 | D36, D53 | Own Gmail OAuth as default, connector as fallback | D55, D56 (OAuth is Advanced) |
 | D40 | TUI as preferred review, chat as fallback | D57 (chat is Basic), TUI is Advanced |
 | D4 | API revocation + guided manual | D24 |

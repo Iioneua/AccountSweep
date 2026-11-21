@@ -1,6 +1,6 @@
-# AccountSweep — Specification v0.1 (rev 4: code-first, agent-thin, Basic/Advanced)
+# AccountSweep — Specification v0.1 (rev 5: code-first, Basic/Advanced, security sweet spot)
 
-**Status:** approved direction, M0 starting. Resolved 2026-11-21: TUI only in v0.1 (web page v0.2), SQLCipher, Basic/Advanced split (rev 4)
+**Status:** approved direction, M0 starting. Resolved 2026-11-21: TUI only in v0.1 (web page v0.2), Basic/Advanced split (rev 4), security sweet spot (rev 5)
 **Date:** 2026-11-21
 **Sources:** the original project brief (kept privately), `README.md`, interview rounds 1–5, design direction of 2026-11-21 (see `DECISIONS.md`)
 
@@ -10,8 +10,12 @@
 
 1. **Code first.** If a task can be done by deterministic code or a well-known tool, the code does it, with no agent thinking and no tokens spent. The agent only does what code can't: talk with the user, read through its connectors, make judgment calls the user asks for, and operate websites in the user's browser (reading account pages, revoking, logging out).
 2. **Basic is simple and stays inside the agent's environment.** The default path needs **no API keys, no OAuth setup and no multi-step work from the user**. The agent uses the connectors it already has (Gmail, browser) and installs and runs the tool itself. Anything that needs keys, OAuth client setup or several manual steps from the user is an **Advanced** option, opt-in, one feature at a time (§3).
-3. **Keep data out of the agent wherever the mode allows.** In Basic, the agent sees only what its connectors must return and what the user needs to see in chat. The tool never echoes more than IDs, counts and short summaries. Advanced options exist for users who want their data to bypass the model completely.
-4. **Most secure, well-known method for every step.** Each step uses an established standard or widely reviewed tool, not a custom scheme. The per-step choices are in §11.1.
+3. **Security sweet spot: secure *and* simple in Basic, secure-but-complicated in Advanced.**
+   - Basic gets every protection that costs the user nothing, applied silently by the tool (§11.2).
+   - Any protection that needs setup, keys, extra tools or extra steps from the user goes into Advanced.
+   - Where the simple path means **the agent reads the user's data** (Gmail headers, account pages, the review list), Basic uses it, **after the user agrees once**. The user is choosing to trust their AI provider (e.g. Anthropic, for Claude) with that data. The AccountSweep project never receives, stores or sees any of it.
+   - Even in Basic, the tool hands the agent only what the next step needs (IDs, counts, short summaries). This minimisation is free, so it is always on.
+4. **Well-known methods for every step.** Each step uses an established standard or widely reviewed tool, not a custom scheme. The per-step choices are in §11.1.
 
 Every design choice below can be traced to one of these rules.
 
@@ -72,7 +76,11 @@ The tool starts every sweep in **Basic**. It mentions Advanced only as a one-lin
 | Extra sources | Connected-apps and devices pages | + password-manager exports |
 | Review | Numbered list in chat | TUI with search, filters, sorting |
 | What reaches the AI model | Sender/subject/date of the matched emails, the review list (site names, recommendations), pages the agent operates | Only counts, IDs, approved site names, pages the agent operates |
-| Local storage | Encrypted DB, key in the OS keychain (automatic, no user step) | Same |
+| Data consent | One clear consent at setup: "your AI provider will see X; AccountSweep never does" | Not needed for features that bypass the model |
+| Local storage | SQLite in the user's profile folder, readable by the user only; the tool recommends turning on disk encryption (BitLocker/FileVault) | **Encrypted database** (SQLCipher, AES-256), key in the OS keychain |
+| Secrets | None needed | OAuth refresh token and HIBP key in the OS keychain |
+| Install check | Agent verifies the release SHA-256 checksum | + GitHub build attestation (`gh attestation verify`) |
+| Approval surface | Chat reply + tool read-back + explicit yes | TUI in the user's own terminal (outside the agent) |
 
 **No-agent use:** an Advanced user can run every step from the terminal alone; browser actions then become guided steps the user does.
 
@@ -102,13 +110,13 @@ accountsweep/
 ```
 
 - **One binary** contains everything. The skill **requires** it, and the skill's first step checks for it and offers install commands.
-- **Storage:** SQLite **encrypted with SQLCipher** (`rusqlite` with the SQLCipher feature) at `%APPDATA%\AccountSweep\accountsweep.db`. A random 256-bit database key is kept in the OS keychain.
-- **Secrets:** the OS keychain (`keyring`: Windows Credential Manager, macOS Keychain, Linux Secret Service) holds the Gmail refresh token, the HIBP key and the DB key. In memory they are wrapped in `secrecy`/`zeroize`. The agent has no command that reveals them.
+- **Storage:** SQLite (`rusqlite`, bundled) at `%APPDATA%\AccountSweep\accountsweep.db`, user-only permissions. **Advanced:** an encrypted build (`--features encrypted-db`, SQLCipher) ships as a separate release asset; `accountsweep db encrypt` migrates an existing database and stores a random 256-bit key in the OS keychain.
+- **Secrets (Advanced only; Basic has none):** the OS keychain (`keyring`: Windows Credential Manager, macOS Keychain, Linux Secret Service) holds the Gmail refresh token, the HIBP key and the DB key. In memory they are wrapped in `secrecy`/`zeroize`. The agent has no command that reveals them.
 - **Network** (allow-listed in code; any other host fails a test):
   - Google OAuth + Gmail API,
   - `haveibeenpwned.com` (catalog; per-email only with a key),
   - `api.gdeltproject.org` (opt-in).
-- **Crates** (each checked as current and maintained at scaffold time): `clap`, `serde`/`serde_json`, `reqwest` (rustls + `rustls-platform-verifier`), `oauth2`, `rusqlite` (SQLCipher), `keyring`, `secrecy`, `zeroize`, `getrandom`, `sha2`, `tokio`, `ratatui`/`crossterm`, `tracing`, `thiserror`/`anyhow`, `psl`, `toml`, `jsonschema`, `directories`, `open`.
+- **Crates** (each checked as current and maintained at scaffold time): `clap`, `serde`/`serde_json`, `reqwest` (rustls + `rustls-platform-verifier`), `oauth2`, `rusqlite` (bundled; SQLCipher behind the `encrypted-db` feature), `keyring`, `secrecy`, `zeroize`, `getrandom`, `sha2`, `tokio`, `ratatui`/`crossterm`, `tracing`, `thiserror`/`anyhow`, `psl`, `toml`, `jsonschema`, `directories`, `open`.
 - **Our crates use `#![forbid(unsafe_code)]`.**
 
 ---
@@ -156,7 +164,7 @@ setup ─► sources ─► discover ─► enrich ─► review ─► approve 
 
 | Phase | Steps (code unless marked 👤 human or 🤖 agent); **[A]** = Advanced only |
 |---|---|
-| **setup** | 🤖 checks `accountsweep --version`, installs it if missing (release download + checksum). Tool creates the encrypted DB, shows the disclaimer and what reaches the AI model in Basic |
+| **setup** | 🤖 checks `accountsweep --version`, installs it if missing (release download + checksum). Tool creates the DB, shows the disclaimer, then `ask_user` **consent**: what the AI provider will see in Basic, and that AccountSweep never receives it. Consent is recorded with a timestamp; no consent → the tool offers the Advanced paths or stops |
 | **sources** | `ask_user`: Gmail and/or connected apps & devices; news yes/no. One-line offer of Advanced options |
 | **discover** | Gmail: `connector_read` 🤖 with the tool's query pack → `ingest gmail_headers`. **[A]** `human_step` 👤 OAuth consent → `run accountsweep scan gmail`. Connected apps: `browser_read` 🤖 Google connections, Google devices, Microsoft apps, Microsoft devices. **[A]** Export: `ask_user` for path → `run accountsweep import <path>` (the agent never opens the file) |
 | **enrich** | `run accountsweep breaches` (catalog cached 24h; **[A]** per-email) → `run accountsweep news` (if opted in) → rules compute recommendations |
@@ -175,6 +183,8 @@ The state is stored in SQLite, so the sweep can be stopped and resumed at any ti
 ```
 accountsweep next [--agent]                  # what to do now (the state machine)
 accountsweep answer <key> <value>            # record a user answer
+accountsweep consent --show | --revoke       # what the AI provider sees in Basic; withdraw consent
+accountsweep db encrypt                      # [Advanced] encrypted build only: migrate to SQLCipher
 accountsweep auth gmail | status | revoke    # [Advanced] own OAuth; tokens only in the keychain
 accountsweep keys set hibp                   # [Advanced] prompt, never argv
 accountsweep scan gmail [--since] [--max]    # [Advanced] needs auth gmail
@@ -306,6 +316,7 @@ Thin on purpose. It contains:
    > AccountSweep can't make your accounts safe and may fail on some sites. "No known breach" only means no public breach is known to the sources checked. Review every action before approving; you are responsible for the accounts you act on.
 8. Site terms: per-recipe `agent_clicks`, visible browser only, never evade bot detection.
 9. Honest limit (`SECURITY.md`): an agent running as your OS user could ignore the skill and imitate approval. Protection comes from approval living in the tool, human-side review surfaces, read-backs and eval tests, not from cryptography.
+10. **Consent before the agent reads data.** Basic starts only after the user agrees to what their AI provider will see. The consent text names the data (matched email headers, account pages, review list) and states that the AccountSweep project receives none of it. `accountsweep consent --show|--revoke` lets the user check or withdraw it.
 
 ### 11.1 Security method per step (rule 3)
 
@@ -315,7 +326,7 @@ Thin on purpose. It contains:
 | Token lifecycle | Refresh token only in the keychain; access token in memory only; `auth revoke` calls Google's revocation endpoint; `purge` revokes before deleting | RFC 7009 |
 | Secrets at rest | OS keychain, never files; env vars only as an explicit CI/headless fallback | Windows Credential Manager (DPAPI), macOS Keychain, Secret Service |
 | Secrets in memory | `secrecy` wrappers, zeroized on drop, never `Debug`-printed | `secrecy`, `zeroize` |
-| Local data at rest | SQLCipher (AES-256) with a random key from the OS CSPRNG, stored in the keychain; data dir readable by the user only (default `%APPDATA%` ACL; `0700`/`0600` on Unix) | SQLCipher, `getrandom` |
+| Local data at rest | Basic: data dir readable by the user only (default `%APPDATA%` ACL; `0700`/`0600` on Unix) + disk-encryption advice. Advanced: SQLCipher (AES-256) with a random key from the OS CSPRNG, stored in the keychain | OS file permissions; SQLCipher, `getrandom` |
 | Network | HTTPS only, TLS 1.2+, rustls with OS trust store, certificate checks never disabled; hard-coded host allow-list tested in CI | rustls, `rustls-platform-verifier` |
 | Password exports (Advanced) | Read in a streaming way into a struct with **no password field**, input buffers zeroized; the file is never copied; after import the tool tells the user to delete it and to keep exports only on an encrypted disk (BitLocker/FileVault) | `csv` + serde, `zeroize` |
 | Breach lookup (domain) | Full HIBP catalog downloaded and matched locally; no per-site queries | HIBP API v3 |
@@ -330,10 +341,25 @@ Thin on purpose. It contains:
 | Dependencies | `Cargo.lock` committed, `cargo deny` (licenses, bans, sources) + `cargo audit` (RustSec) in CI, Dependabot, minimal dependency set | RustSec |
 | CI | GitHub Actions pinned to commit SHAs, least-privilege `permissions:`, gitleaks, GitHub secret scanning + push protection | OpenSSF Scorecard practices |
 | Releases | Reproducible builds where possible, SHA-256 checksums, **GitHub artifact attestations** (SLSA build provenance, Sigstore-backed) | SLSA, Sigstore |
-| Installing the tool | Agent downloads the release asset over HTTPS and verifies its SHA-256 and GitHub attestation (`gh attestation verify` when `gh` is available) before running it | SLSA, Sigstore |
+| Installing the tool | Basic: agent downloads the release asset over HTTPS and verifies its SHA-256 before running it. Advanced: also `gh attestation verify` | SHA-256; SLSA, Sigstore |
 | Updates | No auto-update (no unexpected network calls); users upgrade from signed releases | — |
 | Vulnerability reports | GitHub private vulnerability reporting; `SECURITY.md` with response targets | — |
-| Deleting everything | `purge`: revoke the Gmail token, delete keychain entries, delete the DB and config | — |
+| Deleting everything | `purge`: revoke the Gmail token (if any), delete keychain entries (if any), delete the DB and config | — |
+
+### 11.2 Sweet spot: what is on by default vs. Advanced
+
+| Always on in Basic (invisible to the user) | Advanced (needs setup or extra steps) |
+|---|---|
+| No telemetry; network allow-list; HTTPS with rustls | Own Gmail OAuth so headers never reach the model |
+| Strict schemas on everything the agent pipes in (no bodies, snippets or passwords accepted) | Per-email HIBP check with a key in the keychain |
+| Minimal agent output (IDs, counts, short summaries) | Encrypted database (SQLCipher) |
+| Consent before the agent reads data | Build attestation verification on install |
+| Approval recorded by the tool, read-back + explicit yes, 24h expiry | Approval in the TUI, outside the agent |
+| Hash-chained audit log, redaction in logs | Password-manager import (passwords dropped while reading) |
+| User-only file permissions; SHA-256 check on install | |
+| `#![forbid(unsafe_code)]`, `secrecy`/`zeroize` in code | |
+
+Rule for new features: if a protection is free for the user, it goes in the left column. If it costs the user a step, a key or a tool, it goes in the right column and is offered, never required.
 
 ---
 
@@ -358,10 +384,10 @@ Basic is delivered first and end to end; Advanced features follow.
 | # | Scope | Done when | Est. |
 |---|---|---|---|
 | **M0** | Scaffold, licenses, CI, schemas, fixture data | CI green on 3 OSes | 1 wk |
-| **M1** | Model + encrypted SQLite, `--agent` contract, `next` state machine, Gmail query pack + `connector_read` + `ingest gmail_headers`, grouping/classification, skill v0 | Fixture sweep runs in `--agent` mode; token-budget test in place; real Gmail connector run grouped correctly | 2–3 wk |
+| **M1** | Model + SQLite, consent step, `--agent` contract, `next` state machine, Gmail query pack + `connector_read` + `ingest gmail_headers`, grouping/classification, skill v0 | Fixture sweep runs in `--agent` mode; token-budget test in place; real Gmail connector run grouped correctly | 2–3 wk |
 | **M2** | HIBP catalog, GDELT news + ranking, rule-table recommendations, `explain`, chat review + `approve --chat` with read-back, `report` | Basic sweep goes from discovery to an approved list | 2 wk |
 | **M3** | Recipes (~12) + action cards, `browser_read` (connected apps/devices), `mark`, verify-by-diff, audit log hash chain | Agent revokes a test Google connected app end to end, verified by diff; stops at sign-in. **Basic path complete** | 2 wk |
-| **M4** | Advanced: Gmail OAuth + `scan gmail`, HIBP key + `--check-email`, password export `import` | Each feature works and is off unless turned on; passwords provably dropped | 2–3 wk |
+| **M4** | Advanced: Gmail OAuth + `scan gmail`, HIBP key + `--check-email`, password export `import`, `encrypted-db` build + `db encrypt` | Each feature works and is off unless turned on; passwords provably dropped | 2–3 wk |
 | **M5** | Advanced: TUI review + filters, `list` filters | Approve in TUI → state advances; tampered or expired approvals rejected | 2 wk |
 | **M6** | Skill evals, docs (basic quick start + advanced guides), plugin packaging, release, v0.1 | Evals pass; release published with checksums + attestations | 1–2 wk |
 
@@ -394,6 +420,7 @@ Basic is delivered first and end to end; Advanced features follow.
 | R8 | Heuristic grouping errors | Confidence + reason codes; alias table and rule table editable as data files |
 | R9 | The TUI can't run inside the agent's own shell | TUI is Advanced; Basic uses chat review |
 | R10 | Binary required → less portable to claude.ai web (agent installs it itself on local agents) | v0.1 targets local agents (Claude Code); claude.ai web support is a v0.2 question |
-| R11 | SQLCipher needs a crypto backend; building from source on Windows (vendored OpenSSL) needs Perl/NASM | Prebuilt release binaries cover most users; `cargo install` docs list the prerequisites; check at M0 whether a pure-Rust crypto backend for SQLCipher is viable |
+| R11 | SQLCipher needs a crypto backend; building from source on Windows (vendored OpenSSL) needs Perl/NASM | Advanced only (separate `encrypted-db` build); the default build has no C crypto dependency; prebuilt encrypted asset in releases |
+| R14 | Basic's local DB is not encrypted | User-only permissions; the tool checks whether disk encryption is on (Windows: BitLocker status) and advises; the data is an account list, not credentials; Advanced encrypted build for users who want it |
 | R13 | Connector capabilities differ (result caps, which fields come back) | Verify the Claude Gmail connector in M1; the query pack declares the fields it needs; missing connectors skip that source with a clear message |
 | R12 | Unsigned Windows binaries trigger SmartScreen warnings | Attestations + checksums in v0.1; Authenticode signing (needs a certificate, costs money) considered for v0.2 |

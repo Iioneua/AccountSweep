@@ -41,7 +41,7 @@ The agent installs the tool, checks the release checksum, and walks you through 
 
 No API keys, no OAuth setup, no terminal needed.
 
-**What reaches your AI provider in Basic mode:** the sender, subject and date of the emails the searches match, the review list shown in chat, and the pages the agent opens during actions. AccountSweep itself has no servers and sends no telemetry. If you'd rather keep your email headers away from the AI model entirely, use the Advanced Gmail scan.
+**What reaches your AI provider in Basic mode:** the sender, subject and date of the emails the searches match, the review list shown in chat, and the pages the agent opens during actions. Before anything is read, the tool asks for your consent and says exactly this. You're choosing to trust your AI provider (e.g. Anthropic, for Claude) with that data. **The AccountSweep project never receives any of it:** there are no servers and no telemetry. If you'd rather keep your email headers away from the AI model entirely, use the Advanced Gmail scan.
 
 ## Advanced use (opt-in, one feature at a time)
 
@@ -52,6 +52,7 @@ These need an API key, a setup procedure or a few manual steps, so they're off u
 | **Own Gmail connection** | The tool reads your inbox headers directly over Google's read-only `gmail.metadata` access. Headers never pass through the AI model, and the scan covers the whole inbox | Creating your own Google OAuth client (step-by-step guide, ~10 min) |
 | **Per-email breach check** | Checks your *address* (not just the site) against Have I Been Pwned | A paid HIBP API key, stored in your OS keychain |
 | **Password-manager import** | Adds sites from a Bitwarden or Chrome/Edge export. The tool drops passwords as it reads, and the agent never opens the file | Exporting the file yourself |
+| **Encrypted local database** | Encrypts the tool's local database (SQLCipher, AES-256) with a key kept in your OS keychain. Basic stores it in your user folder with user-only access | Installing the encrypted build |
 | **Terminal review** | A full-screen terminal view with search, filters (breach date, leaked data type, source, confidence…) and sorting to review and approve | Running `accountsweep review` in your terminal |
 
 ## What it will not do
@@ -66,15 +67,8 @@ These need an API key, a setup procedure or a few manual steps, so they're off u
 
 1. **Code first.** Anything deterministic is done by the tool, not by the agent's reasoning.
 2. **Basic is simple.** The default needs no keys or setup; everything else is Advanced.
-3. **Keep data out of the agent** wherever the mode allows. The tool gives the agent IDs, counts and short summaries, not your data.
-4. **Well-known, secure methods for every step:**
-   - Google sign-in done the standard way for desktop apps (RFC 8252 with PKCE),
-   - secrets kept in your OS keychain,
-   - an encrypted local database (SQLCipher),
-   - TLS for every connection (rustls),
-   - a tamper-evident audit log,
-   - signed release provenance.
-   Details in [SPEC.md §11.1](SPEC.md).
+3. **Security sweet spot.** Every protection that costs you nothing is always on: no telemetry, a strict list of allowed hosts, strict checks on everything the agent hands the tool, approval with a read-back, a tamper-evident audit log, and a checksum check on install. Protections that need setup (your own Gmail connection, an encrypted database, keys) are Advanced options. When the simple path means the agent reads your data, the tool asks for your consent first.
+4. **Well-known methods for every step:** Google sign-in done the standard way for desktop apps (RFC 8252 with PKCE), the OS keychain for secrets, rustls for TLS, SQLCipher for encryption, and signed release provenance. Details in [SPEC.md §11](SPEC.md).
 5. **The human decides.** The tool and agent prepare; you approve; only then does anything happen.
 
 ## For terminal users
@@ -124,7 +118,7 @@ Recipes must contain no secrets and must use HTTPS links to the site itself. Che
 - [ ] **M1:** core, encrypted storage, agent contract, Gmail via connector, grouping, skill v0
 - [ ] **M2:** breach + news checks, recommendations, chat review and approval, report
 - [ ] **M3:** recipes, browser actions, verification, audit log (**Basic complete**)
-- [ ] **M4:** Advanced: own Gmail OAuth, per-email HIBP, password-manager import
+- [ ] **M4:** Advanced: own Gmail OAuth, per-email HIBP, password-manager import, encrypted database
 - [ ] **M5:** Advanced: terminal review with filters
 - [ ] **M6:** skill evals, docs, v0.1 release
 
