@@ -1,0 +1,26 @@
+[package]
+name = "accountsweep"
+description = "Find the accounts tied to your email, check them for breaches, and act only on what you approve."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "accountsweep"
+path = "src/main.rs"
+
+[dependencies]
+accountsweep-core.workspace = true
+anyhow.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+jsonschema.workspace = true
+
+[lints]
+workspace = true
