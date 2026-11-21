@@ -1,0 +1,19 @@
+{
+  "schema": "accountsweep.ingest.gmail_headers.v1",
+  "query_id": "signups",
+  "items": [
+    {
+      "message_id": "<a1b2@shop.example>",
+      "from": "Example Shop <no-reply@shop.example>",
+      "subject": "Welcome to Example Shop",
+      "date": "Tue, 02 Mar 2021 10:00:00 +0000"
+    },
+    {
+      "message_id": "<c3d4@notes.example>",
+      "from": "Example Notes <hello@notes.example>",
+      "subject": "Verify your email",
+      "date": "2024-08-14T09:30:00Z"
+    }
+  ],
+  "password": "not-a-real-password"
+}

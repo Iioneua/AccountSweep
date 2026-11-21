@@ -1,0 +1,10 @@
+{
+  "schema": "accountsweep.envelope.v1",
+  "command": "schemas show",
+  "ok": false,
+  "error": {
+    "code": "UNKNOWN_SCHEMA",
+    "message": "unknown schema 'x'"
+  },
+  "warnings": []
+}

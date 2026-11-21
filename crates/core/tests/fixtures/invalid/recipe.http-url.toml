@@ -1,0 +1,9 @@
+site = "notes.example"
+name = "Example Notes"
+last_verified = "2026-11-21"
+agent_clicks = true
+
+[actions.logout]
+url = "http://notes.example/account/security"
+steps = ["Sign out everywhere."]
+success = "Signed out."

@@ -1,0 +1,30 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "discover",
+  "do": "connector_read",
+  "connector": "gmail",
+  "queries": [
+    {
+      "id": "signups",
+      "q": "subject:(\"welcome to\" OR \"verify your email\")",
+      "max_results": 100
+    },
+    {
+      "id": "google_alerts",
+      "q": "from:no-reply@accounts.google.com",
+      "max_results": 50
+    }
+  ],
+  "fields": [
+    "message_id",
+    "from",
+    "subject",
+    "date"
+  ],
+  "ingest_with": [
+    "accountsweep",
+    "ingest",
+    "--kind",
+    "gmail_headers"
+  ]
+}

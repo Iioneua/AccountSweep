@@ -1,0 +1,8 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "setup",
+  "do": "ask_user",
+  "key": "consent",
+  "input": "yes_no",
+  "say": "In Basic mode your AI provider will see the sender, subject and date of matched emails. AccountSweep never receives them. Continue?"
+}

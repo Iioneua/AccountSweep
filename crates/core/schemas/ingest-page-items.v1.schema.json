@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:accountsweep:schema:ingest-page-items:v1",
+  "title": "Items read from an account page by the agent",
+  "description": "stdin for `accountsweep ingest --kind <kind>` after a browser_read instruction: connected apps or devices listed on a Google or Microsoft account page.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "kind", "url", "items"],
+  "properties": {
+    "schema": { "const": "accountsweep.ingest.page_items.v1" },
+    "kind": { "$ref": "#/$defs/kind" },
+    "url": { "type": "string", "pattern": "^https://[^\\s/]+(/\\S*)?$", "maxLength": 500 },
+    "items": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "detail": { "type": "string", "maxLength": 500 },
+          "last_activity": { "type": "string", "maxLength": 100 },
+          "access": {
+            "type": "array",
+            "maxItems": 20,
+            "items": { "type": "string", "minLength": 1, "maxLength": 200 }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "kind": { "enum": ["google_connections", "google_devices", "microsoft_apps", "microsoft_devices"] }
+  }
+}

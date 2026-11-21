@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:accountsweep:schema:ingest-gmail-headers:v1",
+  "title": "Gmail headers piped in by the agent (Basic mode)",
+  "description": "stdin for `accountsweep ingest --kind gmail_headers`. Only four header fields are accepted; bodies, snippets, attachments or any other field are rejected.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "query_id", "items"],
+  "properties": {
+    "schema": { "const": "accountsweep.ingest.gmail_headers.v1" },
+    "query_id": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,40}$" },
+    "items": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["message_id", "from", "subject", "date"],
+        "properties": {
+          "message_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "from": { "type": "string", "minLength": 1, "maxLength": 512 },
+          "subject": { "type": "string", "maxLength": 1000 },
+          "date": { "type": "string", "minLength": 1, "maxLength": 64 }
+        }
+      }
+    }
+  }
+}

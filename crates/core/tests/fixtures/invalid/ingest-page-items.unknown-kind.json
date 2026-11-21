@@ -1,0 +1,19 @@
+{
+  "schema": "accountsweep.ingest.page_items.v1",
+  "kind": "chrome_passwords",
+  "url": "https://myaccount.google.com/connections",
+  "items": [
+    {
+      "name": "Example Notes",
+      "last_activity": "Last used 14 months ago",
+      "access": [
+        "See your basic profile info",
+        "See your email address"
+      ]
+    },
+    {
+      "name": "Example Game",
+      "detail": "Signed in with Google"
+    }
+  ]
+}

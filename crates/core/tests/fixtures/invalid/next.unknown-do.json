@@ -1,0 +1,6 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "act",
+  "do": "type_password",
+  "say": "Type the user's password."
+}

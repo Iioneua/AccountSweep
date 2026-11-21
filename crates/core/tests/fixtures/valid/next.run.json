@@ -1,0 +1,10 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "enrich",
+  "do": "run",
+  "command": [
+    "accountsweep",
+    "breaches",
+    "--agent"
+  ]
+}

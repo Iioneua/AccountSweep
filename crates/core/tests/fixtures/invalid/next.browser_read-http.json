@@ -1,0 +1,16 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "discover",
+  "do": "browser_read",
+  "kind": "google_connections",
+  "url": "http://myaccount.google.com/connections",
+  "extract": [
+    "name"
+  ],
+  "ingest_with": [
+    "accountsweep",
+    "ingest",
+    "--kind",
+    "google_connections"
+  ]
+}

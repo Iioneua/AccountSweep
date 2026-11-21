@@ -1,0 +1,19 @@
+site = "notes.example"
+name = "Example Notes"
+last_verified = "2026-11-21"
+agent_clicks = true
+
+[actions.logout]
+url = "https://notes.example/account/security"
+steps = [
+  "Under 'Sessions', click 'Sign out' next to every session except the current one.",
+]
+success = "Only the current session is listed."
+stop_if = ["sign_in", "two_factor", "captcha"]
+fallback = "No sign-out option? Change the password yourself; that ends other sessions on most sites."
+
+[actions.delete]
+url = "https://notes.example/account/delete"
+steps = ["Export your notes first.", "Follow the confirmation. The final click is yours."]
+success = "The site confirms the account is scheduled for deletion."
+final_click = "user"

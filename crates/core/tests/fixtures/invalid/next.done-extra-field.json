@@ -1,0 +1,7 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "report",
+  "do": "done",
+  "say": "Done.",
+  "token": "not-a-real-token"
+}

@@ -1,0 +1,6 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "review",
+  "do": "say",
+  "say": "Found 42 accounts; 5 sites had a known breach; 3 connected apps unused for over a year."
+}

@@ -1,0 +1,8 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "sources",
+  "do": "ask_user",
+  "key": "sources",
+  "input": "choice",
+  "say": "Pick one."
+}

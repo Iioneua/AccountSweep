@@ -1,0 +1,29 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "act",
+  "do": "browser_act",
+  "item": "itm_09ab",
+  "site": "Example Shop",
+  "action": "delete",
+  "url": "https://shop.example/account/delete",
+  "steps": [
+    "Delete it."
+  ],
+  "success": "Gone.",
+  "stop_if": [
+    "sign_in"
+  ],
+  "agent_clicks": true,
+  "results": [
+    "done_verified",
+    "done_user_confirmed",
+    "handed_to_user",
+    "failed",
+    "skipped"
+  ],
+  "report_with": [
+    "accountsweep",
+    "mark",
+    "itm_09ab"
+  ]
+}

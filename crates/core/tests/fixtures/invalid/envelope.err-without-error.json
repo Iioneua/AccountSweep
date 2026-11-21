@@ -1,0 +1,6 @@
+{
+  "schema": "accountsweep.envelope.v1",
+  "command": "scan",
+  "ok": false,
+  "warnings": []
+}
