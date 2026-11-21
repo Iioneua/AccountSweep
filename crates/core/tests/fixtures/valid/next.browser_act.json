@@ -1,0 +1,34 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "act",
+  "do": "browser_act",
+  "item": "itm_7c21",
+  "site": "Example Notes",
+  "action": "revoke",
+  "url": "https://notes.example/account/security",
+  "steps": [
+    "Open 'Connected apps'.",
+    "Click 'Remove' next to the approved app."
+  ],
+  "success": "The app is no longer listed.",
+  "stop_if": [
+    "sign_in",
+    "two_factor",
+    "captcha",
+    "different_account",
+    "unexpected_warning"
+  ],
+  "agent_clicks": true,
+  "results": [
+    "done_verified",
+    "done_user_confirmed",
+    "handed_to_user",
+    "failed",
+    "skipped"
+  ],
+  "report_with": [
+    "accountsweep",
+    "mark",
+    "itm_7c21"
+  ]
+}

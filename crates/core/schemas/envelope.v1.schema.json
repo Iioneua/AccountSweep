@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:accountsweep:schema:envelope:v1",
+  "title": "AccountSweep command output envelope",
+  "description": "Every command run with --json prints exactly one of these on stdout.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "command", "ok", "warnings"],
+  "properties": {
+    "schema": { "const": "accountsweep.envelope.v1" },
+    "command": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "ok": { "type": "boolean" },
+    "data": {},
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]{1,63}$",
+          "description": "Stable machine-readable error code."
+        },
+        "message": { "type": "string", "maxLength": 2000 }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 50,
+      "items": { "type": "string", "maxLength": 500 }
+    }
+  },
+  "if": { "properties": { "ok": { "const": true } } },
+  "then": { "not": { "required": ["error"] } },
+  "else": { "required": ["error"], "not": { "required": ["data"] } }
+}

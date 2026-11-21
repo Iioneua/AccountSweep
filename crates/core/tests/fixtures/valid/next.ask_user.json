@@ -1,0 +1,23 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "sources",
+  "do": "ask_user",
+  "key": "sources",
+  "input": "multi_choice",
+  "say": "What should I check? Your Gmail (recommended) and your Google/Microsoft connected apps and devices.",
+  "options": [
+    {
+      "value": "gmail",
+      "label": "Gmail"
+    },
+    {
+      "value": "connected_apps",
+      "label": "Connected apps and devices"
+    }
+  ],
+  "answer_with": [
+    "accountsweep",
+    "answer",
+    "sources"
+  ]
+}

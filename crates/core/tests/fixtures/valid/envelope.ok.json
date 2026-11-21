@@ -1,0 +1,9 @@
+{
+  "schema": "accountsweep.envelope.v1",
+  "command": "schemas list",
+  "ok": true,
+  "data": [
+    "next.v1"
+  ],
+  "warnings": []
+}

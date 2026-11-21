@@ -1,0 +1,32 @@
+# cargo-deny configuration: https://embarkstudios.github.io/cargo-deny/
+# Run locally with: cargo deny check
+
+[graph]
+all-features = true
+
+[advisories]
+# RustSec advisories: known vulnerabilities and unsound crates always fail the build.
+unmaintained = "workspace"
+yanked = "deny"
+ignore = []
+
+[licenses]
+# Permissive licenses compatible with MIT OR Apache-2.0 distribution.
+# Keep this list to licenses actually in use; adding one is a reviewed decision.
+allow = [
+    "Apache-2.0",
+    "MIT",
+    "Unicode-3.0",
+]
+confidence-threshold = 0.9
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[sources]
+# Only crates.io; no git or alternative registries.
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

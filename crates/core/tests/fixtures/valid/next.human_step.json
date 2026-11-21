@@ -1,0 +1,6 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "act",
+  "do": "human_step",
+  "say": "Example Notes is asking you to sign in. Please sign in in the browser window, then tell me when you're done."
+}

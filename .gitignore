@@ -52,7 +52,7 @@ report*.html
 /exports/
 /local/
 *.csv
-!tests/fixtures/**/*.csv
+!**/tests/fixtures/**/*.csv
 *.1pux
 *.1pif
 *bitwarden*export*

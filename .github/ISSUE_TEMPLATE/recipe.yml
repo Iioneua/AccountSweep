@@ -1,0 +1,35 @@
+name: Site recipe request or fix
+description: Ask for a new site recipe, or report that an existing one is out of date.
+labels: [recipe]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Recipes describe where a site's security page is and what to click. **Don't include your account details or screenshots showing personal data.**
+  - type: input
+    id: site
+    attributes:
+      label: Site
+      description: Domain, e.g. `example.com`.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Request type
+      options: [New recipe, Existing recipe is out of date]
+    validations:
+      required: true
+  - type: checkboxes
+    id: actions
+    attributes:
+      label: Actions
+      options:
+        - label: Log out of all sessions/devices
+        - label: Revoke connected apps
+        - label: Delete account
+  - type: textarea
+    id: steps
+    attributes:
+      label: Where it is and what to click
+      description: The settings page URL (without account IDs) and the steps, as you'd explain them to a friend.

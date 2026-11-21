@@ -1,0 +1,11 @@
+{
+  "schema": "accountsweep.envelope.v1",
+  "command": "scan",
+  "ok": true,
+  "data": 1,
+  "error": {
+    "code": "INTERNAL",
+    "message": "x"
+  },
+  "warnings": []
+}

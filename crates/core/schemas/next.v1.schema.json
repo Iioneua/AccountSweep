@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:accountsweep:schema:next:v1",
+  "title": "AccountSweep agent instruction",
+  "description": "Output of `accountsweep next --agent`: exactly one instruction for the agent. Commands are argv arrays (never shell strings) and always start with the accountsweep binary.",
+  "type": "object",
+  "required": ["schema", "phase", "do"],
+  "properties": {
+    "schema": { "const": "accountsweep.next.v1" },
+    "phase": {
+      "enum": ["setup", "sources", "discover", "enrich", "review", "approve", "act", "verify", "report"]
+    },
+    "do": {
+      "enum": ["run", "ask_user", "human_step", "connector_read", "browser_read", "browser_act", "say", "done"]
+    },
+    "say": { "$ref": "#/$defs/text" }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/run" },
+    { "$ref": "#/$defs/ask_user" },
+    { "$ref": "#/$defs/human_step" },
+    { "$ref": "#/$defs/connector_read" },
+    { "$ref": "#/$defs/browser_read" },
+    { "$ref": "#/$defs/browser_act" },
+    { "$ref": "#/$defs/say" },
+    { "$ref": "#/$defs/done" }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1, "maxLength": 1500 },
+    "https_url": { "type": "string", "pattern": "^https://[^\\s/]+(/\\S*)?$", "maxLength": 500 },
+    "command": {
+      "description": "argv for the agent to execute. The first element is always the AccountSweep binary.",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 16,
+      "prefixItems": [{ "const": "accountsweep" }],
+      "items": { "type": "string", "minLength": 1, "maxLength": 200 }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "phase", "do", "command"],
+      "properties": {
+        "schema": true, "phase": true, "say": true,
+        "do": { "const": "run" },
+        "command": { "$ref": "#/$defs/command" }
+      }
+    },
+    "ask_user": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "phase", "do", "key", "say", "input"],
+      "properties": {
+        "schema": true, "phase": true, "say": true,
+        "do": { "const": "ask_user" },
+        "key": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,40}$" },
+        "input": { "enum": ["choice", "multi_choice", "yes_no", "text"] },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "label"],
+            "properties": {
+              "value": { "type": "string", "pattern": "^[a-z0-9_]{1,40}$" },
+              "label": { "type": "string", "minLength": 1, "maxLength": 200 }
+            }
+          }
+        },
+        "answer_with": { "$ref": "#/$defs/command" }
+      },
+      "if": { "properties": { "input": { "enum": ["choice", "multi_choice"] } } },
+      "then": { "required": ["options"] }
+    },
+    "human_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "phase", "do", "say"],
+      "properties": {
+        "schema": true, "phase": true, "say": true,
+        "do": { "const": "human_step" }
+      }
+    },
+    "connector_read": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "phase", "do", "connector", "queries", "fields", "ingest_with"],
+      "properties": {
+        "schema": true, "phase": true, "say": true,
+        "do": { "const": "connector_read" },
+        "connector": { "const": "gmail" },
+        "queries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "q", "max_results"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,40}$" },
+              "q": { "type": "string", "minLength": 1, "maxLength": 500 },
+              "max_results": { "type": "integer", "minimum": 1, "maximum": 100 }
+            }
+          }
+        },
+        "fields": {
+          "description": "The only fields the agent may pass on. Bodies and snippets are never requested.",
+          "const": ["message_id", "from", "subject", "date"]
+        },
+        "ingest_with": { "$ref": "#/$defs/command" }
+      }
+    },
+    "browser_read": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "phase", "do", "kind", "url", "extract", "ingest_with"],
+      "properties": {
+        "schema": true, "phase": true, "say": true,
+        "do": { "const": "browser_read" },
+        "kind": { "enum": ["google_connections", "google_devices", "microsoft_apps", "microsoft_devices"] },
+        "url": { "$ref": "#/$defs/https_url" },
+        "extract": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["name", "detail", "last_activity", "access"] }
+        },
+        "ingest_with": { "$ref": "#/$defs/command" }
+      }
+    },
+    "browser_act": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "phase", "do", "item", "site", "action", "url", "steps", "success", "stop_if", "agent_clicks", "results", "report_with"],
+      "properties": {
+        "schema": true, "phase": true, "say": true,
+        "do": { "const": "browser_act" },
+        "item": { "type": "string", "pattern": "^itm_[0-9a-f]{4,32}$" },
+        "site": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "action": { "enum": ["logout", "revoke", "delete"] },
+        "url": { "$ref": "#/$defs/https_url" },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 15,
+          "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+        },
+        "success": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "stop_if": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["sign_in", "password", "two_factor", "captcha", "payment", "different_account", "unexpected_warning"] }
+        },
+        "agent_clicks": { "type": "boolean" },
+        "results": {
+          "const": ["done_verified", "done_user_confirmed", "handed_to_user", "failed", "skipped"]
+        },
+        "report_with": {
+          "description": "argv to run with exactly one value from `results` appended.",
+          "$ref": "#/$defs/command"
+        }
+      },
+      "if": { "properties": { "action": { "const": "delete" } } },
+      "then": { "properties": { "agent_clicks": { "const": false } } }
+    },
+    "say": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "phase", "do", "say"],
+      "properties": {
+        "schema": true, "phase": true, "say": true,
+        "do": { "const": "say" }
+      }
+    },
+    "done": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "phase", "do", "say"],
+      "properties": {
+        "schema": true, "phase": { "const": "report" }, "say": true,
+        "do": { "const": "done" }
+      }
+    }
+  }
+}

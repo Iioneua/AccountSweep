@@ -1,0 +1,25 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "discover",
+  "do": "connector_read",
+  "connector": "gmail",
+  "queries": [
+    {
+      "id": "all",
+      "q": "in:anywhere",
+      "max_results": 5000
+    }
+  ],
+  "fields": [
+    "message_id",
+    "from",
+    "subject",
+    "date"
+  ],
+  "ingest_with": [
+    "accountsweep",
+    "ingest",
+    "--kind",
+    "gmail_headers"
+  ]
+}

@@ -49,6 +49,11 @@ Running record of project decisions. **[delegated]** = you said "you decide" (or
 | D62 | Consent step at setup names what the AI provider sees and that the project receives nothing; `consent --show/--revoke` | User decides whom to trust |
 | D63 | Install check: SHA-256 in Basic; build attestation verification in Advanced | Needs `gh`, so it's an extra tool |
 | D64 | `MASTER_PROMPT.md` kept private (gitignored), removed from the published history | User request |
+| D65 | **[delegated]** Schemas live in `crates/core/schemas/` (not repo root) and are embedded with `include_str!` | Keeps the crate self-contained and publishable for `cargo install` |
+| D66 | **[delegated]** Toolchain pinned to Rust 1.99.0 in `rust-toolchain.toml`; edition 2024; MSRV 1.85 (set by clap/jsonschema) checked in CI | Reproducible CI; declared MSRV is actually tested |
+| D67 | **[delegated]** Agent commands in `next.v1` are argv arrays whose first element must be `accountsweep`; never shell strings | The tool can only ask the agent to run the tool itself; no shell injection |
+| D68 | **[delegated]** `cargo-deny` covers RustSec advisories (replaces a separate `cargo audit` step); license allowlist limited to licenses in use | One well-known tool; new licenses are a reviewed change |
+| D69 | **[delegated]** Fixtures must use reserved example domains, enforced by a test | Keeps real personal data out of the public repo |
 
 ## Superseded
 

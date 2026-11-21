@@ -1,0 +1,10 @@
+site = "notes.example"
+name = "Example Notes"
+last_verified = "2026-11-21"
+agent_clicks = true
+
+[actions.delete]
+url = "https://notes.example/account/delete"
+steps = ["Delete the account."]
+success = "Deleted."
+final_click = "agent"

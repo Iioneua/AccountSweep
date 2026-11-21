@@ -1,0 +1,6 @@
+{
+  "schema": "accountsweep.next.v1",
+  "phase": "report",
+  "do": "done",
+  "say": "Done: 4 revoked (verified), 1 handed to you. Report saved locally."
+}
