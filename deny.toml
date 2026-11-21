@@ -16,9 +16,16 @@ ignore = []
 allow = [
     "Apache-2.0",
     "MIT",
+    "MIT-0",
     "Unicode-3.0",
+    "Zlib",
 ]
 confidence-threshold = 0.9
+
+# MPL-2.0 (file-level copyleft) is accepted only for these crates, used unmodified.
+exceptions = [
+    { allow = ["MPL-2.0"], crate = "option-ext" },
+]
 
 [bans]
 multiple-versions = "warn"
