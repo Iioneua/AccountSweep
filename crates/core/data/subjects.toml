@@ -1,0 +1,85 @@
+# Subject rules. Subjects are matched in memory, case-insensitively; only the
+# resulting category (or an app name captured from a security alert) is kept.
+# The subject text itself is never stored.
+
+# Categories: the first category with a matching phrase wins.
+[[category]]
+name = "password_reset"
+contains = ["reset your password", "password reset", "password change", "password was changed", "forgot your password"]
+
+[[category]]
+name = "welcome"
+contains = [
+  "welcome to", "welcome aboard", "thanks for signing up", "thank you for signing up",
+  "thanks for joining", "verify your email", "confirm your email", "verify your account",
+  "confirm your account", "activate your account", "confirm your registration",
+  "complete your registration",
+]
+
+[[category]]
+name = "receipt"
+contains = ["receipt", "invoice", "order confirmation", "your order", "payment received", "payment confirmation"]
+
+[[category]]
+name = "subscription"
+contains = ["your subscription", "subscription confirmed", "renewal", "renews", "free trial", "membership"]
+
+[[category]]
+name = "newsletter"
+contains = ["newsletter", "digest", "weekly update", "this week"]
+
+# Security alerts from account providers. Matched only when the sender host is
+# exactly `sender_host`. Each rule uses one of:
+#   suffix   = text that ends the subject; the text before it is the app/device name
+#   prefix   = text that starts the subject; the text after it is the app/device name
+#   contains = phrase anywhere; no name captured
+# `type` is third_party_app or sign_in. Rules are tried in order.
+# NOTE: exact subject wording must be confirmed on real samples (SPEC risk R4).
+
+[[alert]]
+provider = "google"
+sender_host = "accounts.google.com"
+type = "third_party_app"
+suffix = " was granted access to your google account"
+
+[[alert]]
+provider = "google"
+sender_host = "accounts.google.com"
+type = "third_party_app"
+suffix = " has access to your google account"
+
+[[alert]]
+provider = "google"
+sender_host = "accounts.google.com"
+type = "sign_in"
+prefix = "new sign-in on "
+
+[[alert]]
+provider = "google"
+sender_host = "accounts.google.com"
+type = "sign_in"
+contains = "sign-in"
+
+[[alert]]
+provider = "google"
+sender_host = "accounts.google.com"
+type = "third_party_app"
+contains = "security alert"
+
+[[alert]]
+provider = "microsoft"
+sender_host = "accountprotection.microsoft.com"
+type = "third_party_app"
+contains = "new app"
+
+[[alert]]
+provider = "microsoft"
+sender_host = "accountprotection.microsoft.com"
+type = "sign_in"
+contains = "sign-in"
+
+[[alert]]
+provider = "microsoft"
+sender_host = "accountprotection.microsoft.com"
+type = "third_party_app"
+contains = "security alert"

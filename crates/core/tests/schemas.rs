@@ -166,7 +166,11 @@ fn is_allowed_host(host: &str) -> bool {
     let host = host.trim_end_matches('.').to_ascii_lowercase();
     const RESERVED_SUFFIXES: [&str; 4] = [".example", ".test", ".invalid", ".localhost"];
     const RESERVED_DOMAINS: [&str; 3] = ["example.com", "example.org", "example.net"];
-    const PUBLIC_SERVICE_HOSTS: [&str; 2] = ["myaccount.google.com", "accounts.google.com"];
+    const PUBLIC_SERVICE_HOSTS: [&str; 3] = [
+        "myaccount.google.com",
+        "accounts.google.com",
+        "accountprotection.microsoft.com",
+    ];
     RESERVED_SUFFIXES.iter().any(|s| host.ends_with(s))
         || RESERVED_DOMAINS
             .iter()
@@ -174,41 +178,73 @@ fn is_allowed_host(host: &str) -> bool {
         || PUBLIC_SERVICE_HOSTS.contains(&host.as_str())
 }
 
-fn hosts_in(text: &str) -> Vec<String> {
+/// Every `(local part, host)` mentioned as an email address, plus every URL host
+/// (with no local part).
+fn hosts_in(text: &str) -> Vec<(Option<String>, String)> {
     let mut hosts = Vec::new();
     let is_host_char = |c: char| c.is_ascii_alphanumeric() || c == '.' || c == '-';
-    // Email addresses: the part after '@'.
+    let is_local_char = |c: char| c.is_ascii_alphanumeric() || "._%+-".contains(c);
     for (i, _) in text.match_indices('@') {
         let host: String = text[i + 1..]
             .chars()
             .take_while(|c| is_host_char(*c))
             .collect();
+        let local: String = text[..i]
+            .chars()
+            .rev()
+            .take_while(|c| is_local_char(*c))
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .collect();
         if host.contains('.') {
-            hosts.push(host);
+            hosts.push((Some(local), host));
         }
     }
-    // URLs: the part after "://".
     for (i, _) in text.match_indices("://") {
         let host: String = text[i + 3..]
             .chars()
             .take_while(|c| is_host_char(*c))
             .collect();
         if !host.is_empty() {
-            hosts.push(host);
+            hosts.push((None, host));
         }
     }
     hosts
 }
 
+/// Real service domains fixtures may use to exercise specific rules:
+/// bulk-email relays (any subdomain) and freemail providers (only with the
+/// obviously fake local parts below, so no real address can slip in).
+fn is_allowed_test_address(local: Option<&str>, host: &str) -> bool {
+    const RELAYS: [&str; 1] = ["sendgrid.net"];
+    const FREEMAIL: [&str; 1] = ["gmail.com"];
+    const FAKE_LOCAL_PARTS: [&str; 2] = ["alice", "bob"];
+    RELAYS.iter().any(|r| host.ends_with(&format!(".{r}")))
+        || (FREEMAIL.contains(&host) && local.is_some_and(|l| FAKE_LOCAL_PARTS.contains(&l)))
+}
+
+fn all_fixture_files(dir: &Path, out: &mut Vec<PathBuf>) {
+    for entry in fs::read_dir(dir).expect("readable dir") {
+        let path = entry.expect("entry").path();
+        if path.is_dir() {
+            all_fixture_files(&path, out);
+        } else {
+            out.push(path);
+        }
+    }
+}
+
 #[test]
 fn fixtures_use_only_reserved_example_domains() {
-    let mut files = fixture_files("valid");
-    files.extend(fixture_files("invalid"));
+    let mut files = Vec::new();
+    all_fixture_files(&fixtures_dir(""), &mut files);
+    assert!(files.len() > 30, "expected to scan every fixture");
     for path in files {
         let text = fs::read_to_string(&path).expect("readable");
-        for host in hosts_in(&text) {
+        for (local, host) in hosts_in(&text) {
             assert!(
-                is_allowed_host(&host),
+                is_allowed_host(&host) || is_allowed_test_address(local.as_deref(), &host),
                 "{} mentions '{host}'. Fixtures must use reserved example domains (e.g. shop.example, example.com).",
                 path.display()
             );

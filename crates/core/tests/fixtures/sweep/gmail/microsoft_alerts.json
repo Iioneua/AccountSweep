@@ -1,0 +1,12 @@
+{
+  "schema": "accountsweep.ingest.gmail_headers.v1",
+  "query_id": "microsoft_alerts",
+  "items": [
+    {
+      "message_id": "<m1@accountprotection.microsoft.com>",
+      "from": "Microsoft account team <account-security-noreply@accountprotection.microsoft.com>",
+      "subject": "New app(s) connected to your Microsoft account",
+      "date": "2023-07-07T10:00:00Z"
+    }
+  ]
+}
