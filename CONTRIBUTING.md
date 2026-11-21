@@ -20,18 +20,24 @@ cargo test --workspace                                  # tests
 cargo deny check                                        # advisories, licenses, sources (cargo install cargo-deny)
 ```
 
-CI runs all of these on Windows, macOS and Linux, plus a minimum-Rust-version check (1.85) and a secret scan.
+CI runs all of these on Windows, macOS and Linux, plus a minimum-Rust-version check (1.89) and a secret scan.
 
 ## Project layout
 
 ```
-crates/core/          library: data model, agent contract, schemas
+crates/core/          library: data model, storage, workflow, agent contract
+  data/               rules as TOML: Gmail query pack, sender lists, subject rules
   schemas/            JSON Schemas (the tool ↔ agent contract)
-  tests/fixtures/     valid/ and invalid/ examples for every schema
+  tests/fixtures/     valid/ and invalid/ schema examples, plus a fake Gmail sweep
 crates/cli/           the `accountsweep` binary
+skill/accountsweep/   the agent skill (SKILL.md + references)
 ```
 
-More directories (`recipes/`, `skill/`, `docs/`) arrive with later milestones.
+`recipes/` and `docs/` arrive with later milestones.
+
+## Tuning rules
+
+Grouping and classification are data, not code. To add a subject phrase, a bulk-email relay or a Gmail search, edit the TOML in `crates/core/data/` and run `cargo test -p accountsweep-core`. Tests validate the files and replay the fake sweep.
 
 ## Changing a schema
 

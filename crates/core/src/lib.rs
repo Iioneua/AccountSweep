@@ -1,12 +1,20 @@
 //! Core library for AccountSweep.
 //!
-//! M0 scope: the versioned JSON Schemas that define the contract between the
-//! tool and an agent, and the output envelope every `--json` command prints.
-//! Scanning, enrichment and the workflow state machine arrive in later
-//! milestones (see `SPEC.md` §13).
+//! The tool does all deterministic work (grouping, classification, state);
+//! the agent only relays questions, reads through its connectors and acts in
+//! the browser. See `SPEC.md` §0 and §5.
 
+pub mod classify;
+pub mod error;
+pub mod flow;
+pub mod ingest;
+pub mod model;
 pub mod output;
+pub mod rules;
 pub mod schemas;
+pub mod store;
+
+pub use error::{Error, Result};
 
 /// Version of this crate, shared by the whole workspace.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

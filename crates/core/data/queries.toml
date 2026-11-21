@@ -1,0 +1,54 @@
+# Gmail query pack (Basic mode).
+#
+# The agent runs these searches with its own Gmail connector and pipes only
+# sender, subject, date and message ID back to `accountsweep ingest`.
+# The tool owns this list so the agent never decides what to look for.
+#
+# Fields:
+#   id           stable identifier, [a-z0-9_]
+#   q            Gmail search syntax
+#   category     fallback category when the subject matches no rule
+#                (welcome, password_reset, receipt, subscription, security_alert)
+#   max_results  cap per query (1-100); keeps the agent's token use bounded
+
+[[query]]
+id = "signups"
+category = "welcome"
+max_results = 60
+q = 'subject:("welcome to" OR "thanks for signing up" OR "thank you for signing up" OR "thanks for joining" OR "verify your email" OR "confirm your email" OR "verify your account" OR "confirm your account" OR "activate your account" OR "complete your registration")'
+
+[[query]]
+id = "password_resets"
+category = "password_reset"
+max_results = 40
+q = 'subject:("reset your password" OR "password reset" OR "password change" OR "your password was changed" OR "forgot your password")'
+
+[[query]]
+id = "billing"
+category = "receipt"
+max_results = 40
+q = 'subject:(receipt OR invoice OR "order confirmation" OR "your order" OR "payment received" OR "payment confirmation")'
+
+[[query]]
+id = "subscriptions"
+category = "subscription"
+max_results = 40
+q = 'subject:("your subscription" OR "subscription confirmed" OR "renewal" OR "free trial" OR "membership")'
+
+[[query]]
+id = "social_signins"
+category = "welcome"
+max_results = 30
+q = '"Sign in with Google" OR "Sign in with Apple" OR "Log in with Facebook" OR "Continue with Google"'
+
+[[query]]
+id = "google_alerts"
+category = "security_alert"
+max_results = 40
+q = 'from:no-reply@accounts.google.com'
+
+[[query]]
+id = "microsoft_alerts"
+category = "security_alert"
+max_results = 30
+q = 'from:account-security-noreply@accountprotection.microsoft.com'

@@ -1,0 +1,36 @@
+{
+  "schema": "accountsweep.ingest.gmail_headers.v1",
+  "query_id": "signups",
+  "items": [
+    {
+      "message_id": "<s1@shop.example>",
+      "from": "Example Shop <no-reply@shop.example>",
+      "subject": "Welcome to Example Shop!",
+      "date": "Tue, 02 Mar 2021 10:00:00 +0000"
+    },
+    {
+      "message_id": "<s2@notes.example>",
+      "from": "Example Notes <hello@mail.notes.example>",
+      "subject": "Verify your email",
+      "date": "2019-05-10T08:00:00Z"
+    },
+    {
+      "message_id": "<s3@game.example>",
+      "from": "Example Game <bounce@em42.sendgrid.net>",
+      "subject": "Thanks for signing up",
+      "date": "Sat, 11 Jan 2020 18:30:00 +0100 (CET)"
+    },
+    {
+      "message_id": "<s4@friend.example>",
+      "from": "Alice Example <alice@gmail.com>",
+      "subject": "Welcome to the neighbourhood!",
+      "date": "2023-04-01T12:00:00Z"
+    },
+    {
+      "message_id": "<s5@forum.example>",
+      "from": "Forum <noreply@forum.example>",
+      "subject": "Confirm your account",
+      "date": "2016-02-29"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "accountsweep.ingest.gmail_headers.v1",
+  "query_id": "billing",
+  "items": [
+    {
+      "message_id": "<b1@shop.example>",
+      "from": "Example Shop <orders@shop.example>",
+      "subject": "Your order #1234",
+      "date": "2025-06-01T10:00:00Z"
+    },
+    {
+      "message_id": "<b2@stream.example>",
+      "from": "Example Stream <billing@stream.example>",
+      "subject": "Your receipt from Example Stream",
+      "date": "2025-10-01T10:00:00Z"
+    }
+  ]
+}

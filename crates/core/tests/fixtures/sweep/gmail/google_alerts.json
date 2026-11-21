@@ -1,0 +1,24 @@
+{
+  "schema": "accountsweep.ingest.gmail_headers.v1",
+  "query_id": "google_alerts",
+  "items": [
+    {
+      "message_id": "<g1@accounts.google.com>",
+      "from": "Google <no-reply@accounts.google.com>",
+      "subject": "Example Notes was granted access to your Google Account",
+      "date": "2022-03-03T10:00:00Z"
+    },
+    {
+      "message_id": "<g2@accounts.google.com>",
+      "from": "Google <no-reply@accounts.google.com>",
+      "subject": "New sign-in on Windows",
+      "date": "2025-09-09T10:00:00Z"
+    },
+    {
+      "message_id": "<g3@accounts.google.com>",
+      "from": "Google <no-reply@accounts.google.com>",
+      "subject": "Security alert",
+      "date": "2024-01-01T10:00:00Z"
+    }
+  ]
+}

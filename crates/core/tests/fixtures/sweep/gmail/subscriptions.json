@@ -1,0 +1,18 @@
+{
+  "schema": "accountsweep.ingest.gmail_headers.v1",
+  "query_id": "subscriptions",
+  "items": [
+    {
+      "message_id": "<u1@stream.example>",
+      "from": "Example Stream <billing@stream.example>",
+      "subject": "Your subscription renews soon",
+      "date": "2025-11-01T10:00:00Z"
+    },
+    {
+      "message_id": "<u2@news.example>",
+      "from": "Example News <digest@news.example>",
+      "subject": "Your weekly digest",
+      "date": "2025-11-15T07:00:00Z"
+    }
+  ]
+}

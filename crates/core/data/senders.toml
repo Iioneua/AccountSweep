@@ -1,0 +1,30 @@
+# Sender rules used when grouping email by site.
+
+# Personal email providers. Mail from these domains comes from people, not
+# services, so it is ignored entirely (never stored, never shown).
+freemail = [
+  "126.com", "163.com", "aol.com", "daum.net", "fastmail.com", "free.fr",
+  "gmail.com", "gmx.com", "gmx.de", "gmx.net", "googlemail.com", "hey.com",
+  "hotmail.com", "icloud.com", "laposte.net", "libero.it", "live.com",
+  "mac.com", "mail.com", "me.com", "msn.com", "naver.com", "o2.pl",
+  "orange.fr", "outlook.com", "pm.me", "proton.me", "protonmail.com", "qq.com",
+  "rediffmail.com", "seznam.cz", "tuta.io", "tutanota.com", "web.de", "wp.pl",
+  "yahoo.com", "yandex.com", "yandex.ru", "ymail.com", "zoho.com",
+]
+
+# Bulk-email relays. Mail sent "via" these belongs to the brand in the display
+# name, so it is grouped by display name and its domain is left unknown.
+relays = [
+  "amazonses.com", "ccsend.com", "customeriomail.com", "exacttarget.com",
+  "hubspotemail.net", "intercom-mail.com", "klaviyomail.com", "mailgun.net",
+  "mailgun.org", "mailjet.com", "mandrillapp.com", "mcdlv.net", "mcsv.net",
+  "postmarkapp.com", "rsgsv.net", "sendgrid.net", "sendinblue.com",
+  "sparkpostmail.com",
+]
+
+# Services that send mail from a different registrable domain than their site.
+[aliases]
+"facebookmail.com" = "facebook.com"
+"twitter.com" = "x.com"
+"youtube.com" = "google.com"
+"microsoftonline.com" = "microsoft.com"

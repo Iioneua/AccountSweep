@@ -46,14 +46,21 @@ Running record of project decisions. **[delegated]** = you said "you decide" (or
 | D59 | Milestones deliver the Basic path end to end first (M1–M3), Advanced after (M4–M5) | Basic is the main product |
 | D60 | Security sweet spot: free protections always on; complicated ones Advanced; agent-reads-data paths allowed in Basic after one recorded user consent | User direction 2026-11-21 |
 | D61 | Default build uses plain SQLite with user-only permissions + disk-encryption advice; SQLCipher is an Advanced build feature (`encrypted-db`, `db encrypt`) | Removes C crypto build dependency from Basic; encryption stays available |
-| D62 | Consent step at setup names what the AI provider sees and that the project receives nothing; `consent --show/--revoke` | User decides whom to trust |
+| D62 | Consent step at setup names what the AI provider sees and that the project receives nothing; `consent` / `consent --reset` | User decides whom to trust |
 | D63 | Install check: SHA-256 in Basic; build attestation verification in Advanced | Needs `gh`, so it's an extra tool |
 | D64 | `MASTER_PROMPT.md` kept private (gitignored), removed from the published history | User request |
 | D65 | **[delegated]** Schemas live in `crates/core/schemas/` (not repo root) and are embedded with `include_str!` | Keeps the crate self-contained and publishable for `cargo install` |
-| D66 | **[delegated]** Toolchain pinned to Rust 1.99.0 in `rust-toolchain.toml`; edition 2024; MSRV 1.85 (set by clap/jsonschema) checked in CI | Reproducible CI; declared MSRV is actually tested |
+| D66 | **[delegated]** Toolchain pinned to Rust 1.99.0 in `rust-toolchain.toml`; edition 2024; MSRV checked in CI (1.85 at M0; raised to 1.89 in D70) | Reproducible CI; declared MSRV is actually tested |
 | D67 | **[delegated]** Agent commands in `next.v1` are argv arrays whose first element must be `accountsweep`; never shell strings | The tool can only ask the agent to run the tool itself; no shell injection |
 | D68 | **[delegated]** `cargo-deny` covers RustSec advisories (replaces a separate `cargo audit` step); license allowlist limited to licenses in use | One well-known tool; new licenses are a reviewed change |
 | D69 | **[delegated]** Fixtures must use reserved example domains, enforced by a test | Keeps real personal data out of the public repo |
+| D70 | **[delegated]** MSRV raised to 1.89 so current `rusqlite`, `time` and `sha2` can be used | Latest versions carry the latest fixes; 1.89 is over a year old |
+| D71 | **[delegated]** Data folder is the local, non-roaming app-data dir (`%LOCALAPPDATA%\AccountSweep\data` on Windows), overridable with `--home` / `ACCOUNTSWEEP_HOME` | Roaming profiles would copy the account list to other machines |
+| D72 | **[delegated]** Mail from freemail domains is ignored entirely; relay mail is grouped by display name | Personal correspondence is not an account; avoids storing people's names |
+| D73 | **[delegated]** Per email only category, day, sender registrable domain and a SHA-256 of the message id are stored; never subject, address or message id | Data minimisation; dedupe still works |
+| D74 | **[delegated]** `next` is read-only; answers, ingests and skips advance the sweep; `ingest` refuses input before consent | Same state always gives the same instruction; consent enforced in code, not only in the skill |
+| D75 | **[delegated]** Ingest errors report where input is wrong (JSON path + rule), never its content | Error messages never echo email data back to the agent |
+| D76 | **[delegated]** License allowlist adds MIT-0 and Zlib (permissive); MPL-2.0 allowed only for `option-ext` (dependency of `directories`, used unmodified) | Narrow, reviewed exception instead of allowing MPL everywhere |
 
 ## Superseded
 

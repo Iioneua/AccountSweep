@@ -111,7 +111,7 @@ accountsweep/
 ```
 
 - **One binary** contains everything. The skill **requires** it, and the skill's first step checks for it and offers install commands.
-- **Storage:** SQLite (`rusqlite`, bundled) at `%APPDATA%\AccountSweep\accountsweep.db`, user-only permissions. **Advanced:** an encrypted build (`--features encrypted-db`, SQLCipher) ships as a separate release asset; `accountsweep db encrypt` migrates an existing database and stores a random 256-bit key in the OS keychain.
+- **Storage:** SQLite (`rusqlite`, bundled) at `%LOCALAPPDATA%\AccountSweep\data\accountsweep.db` (local, non-roaming; override with `--home` or `ACCOUNTSWEEP_HOME`), user-only permissions, SQLite `secure_delete` on. **Advanced:** an encrypted build (`--features encrypted-db`, SQLCipher) ships as a separate release asset; `accountsweep db encrypt` migrates an existing database and stores a random 256-bit key in the OS keychain.
 - **Secrets (Advanced only; Basic has none):** the OS keychain (`keyring`: Windows Credential Manager, macOS Keychain, Linux Secret Service) holds the Gmail refresh token, the HIBP key and the DB key. In memory they are wrapped in `secrecy`/`zeroize`. The agent has no command that reveals them.
 - **Network** (allow-listed in code; any other host fails a test):
   - Google OAuth + Gmail API,
@@ -184,7 +184,7 @@ The state is stored in SQLite, so the sweep can be stopped and resumed at any ti
 ```
 accountsweep next [--agent]                  # what to do now (the state machine)
 accountsweep answer <key> <value>            # record a user answer
-accountsweep consent --show | --revoke       # what the AI provider sees in Basic; withdraw consent
+accountsweep consent [--reset]               # show what the AI provider sees in Basic; --reset forgets the answer
 accountsweep db encrypt                      # [Advanced] encrypted build only: migrate to SQLCipher
 accountsweep auth gmail | status | revoke    # [Advanced] own OAuth; tokens only in the keychain
 accountsweep keys set hibp                   # [Advanced] prompt, never argv
@@ -224,6 +224,9 @@ accountsweep purge                           # delete DB, config, keychain entri
 The tool owns the list of Gmail searches the agent runs (`connector_read`), so the agent never decides what to look for. It covers sign-ups, password resets, receipts and subscriptions, Google and Microsoft security alerts, and "Sign in with Google/Apple/Facebook" confirmations. Each query is capped (e.g. 100 results) to bound connector tokens. The query pack is a data file contributors can extend.
 
 ### Grouping and classification
+- **Personal mail is ignored:** senders on a freemail list (gmail.com, outlook.com, …) are people, not services; their messages are never stored.
+- **Bulk-email relays** (SendGrid, Mailgun, Amazon SES, …) are grouped by the sender's display name, with the domain left unknown.
+- **Stored per email:** site, category, date (day only), registrable sender domain, and a SHA-256 hash of the message id for de-duplication. Never the subject, the sender address or the message id itself.
 - Sender domain → registrable domain via the PSL, then an alias table (e.g. `accounts.google.com` → Google; email-service relay domains → the brand from the display name).
 - Subject keyword categories:
   - `welcome`, `verify` → `account`,
@@ -317,7 +320,7 @@ Thin on purpose. It contains:
    > AccountSweep can't make your accounts safe and may fail on some sites. "No known breach" only means no public breach is known to the sources checked. Review every action before approving; you are responsible for the accounts you act on.
 8. Site terms: per-recipe `agent_clicks`, visible browser only, never evade bot detection.
 9. Honest limit (`SECURITY.md`): an agent running as your OS user could ignore the skill and imitate approval. Protection comes from approval living in the tool, human-side review surfaces, read-backs and eval tests, not from cryptography.
-10. **Consent before the agent reads data.** Basic starts only after the user agrees to what their AI provider will see. The consent text names the data (matched email headers, account pages, review list) and states that the AccountSweep project receives none of it. `accountsweep consent --show|--revoke` lets the user check or withdraw it.
+10. **Consent before the agent reads data.** Basic starts only after the user agrees to what their AI provider will see. The consent text names the data (matched email headers, account pages, review list) and states that the AccountSweep project receives none of it. `accountsweep consent` shows it; `accountsweep consent --reset` withdraws it (the tool asks again before reading anything).
 
 ### 11.1 Security method per step (rule 3)
 
@@ -327,7 +330,7 @@ Thin on purpose. It contains:
 | Token lifecycle | Refresh token only in the keychain; access token in memory only; `auth revoke` calls Google's revocation endpoint; `purge` revokes before deleting | RFC 7009 |
 | Secrets at rest | OS keychain, never files; env vars only as an explicit CI/headless fallback | Windows Credential Manager (DPAPI), macOS Keychain, Secret Service |
 | Secrets in memory | `secrecy` wrappers, zeroized on drop, never `Debug`-printed | `secrecy`, `zeroize` |
-| Local data at rest | Basic: data dir readable by the user only (default `%APPDATA%` ACL; `0700`/`0600` on Unix) + disk-encryption advice. Advanced: SQLCipher (AES-256) with a random key from the OS CSPRNG, stored in the keychain | OS file permissions; SQLCipher, `getrandom` |
+| Local data at rest | Basic: data dir readable by the user only (default `%LOCALAPPDATA%` ACL; `0700`/`0600` on Unix) + disk-encryption advice. Advanced: SQLCipher (AES-256) with a random key from the OS CSPRNG, stored in the keychain | OS file permissions; SQLCipher, `getrandom` |
 | Network | HTTPS only, TLS 1.2+, rustls with OS trust store, certificate checks never disabled; hard-coded host allow-list tested in CI | rustls, `rustls-platform-verifier` |
 | Password exports (Advanced) | Read in a streaming way into a struct with **no password field**, input buffers zeroized; the file is never copied; after import the tool tells the user to delete it and to keep exports only on an encrypted disk (BitLocker/FileVault) | `csv` + serde, `zeroize` |
 | Breach lookup (domain) | Full HIBP catalog downloaded and matched locally; no per-site queries | HIBP API v3 |

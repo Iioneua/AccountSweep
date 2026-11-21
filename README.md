@@ -114,8 +114,8 @@ Recipes must contain no secrets and must use HTTPS links to the site itself. Che
 
 ## Roadmap
 
-- [ ] **M0:** scaffold, licenses, CI, schemas
-- [ ] **M1:** core, encrypted storage, agent contract, Gmail via connector, grouping, skill v0
+- [x] **M0:** scaffold, licenses, CI, schemas
+- [x] **M1:** core, local storage, consent, agent contract, Gmail via connector, grouping, skill v0
 - [ ] **M2:** breach + news checks, recommendations, chat review and approval, report
 - [ ] **M3:** recipes, browser actions, verification, audit log (**Basic complete**)
 - [ ] **M4:** Advanced: own Gmail OAuth, per-email HIBP, password-manager import, encrypted database
