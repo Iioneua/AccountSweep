@@ -1,0 +1,81 @@
+# ── Private working notes (kept locally, never published) ──
+MASTER_PROMPT.md
+CLAUDE.local.md
+/notes/
+/private/
+
+# ── Rust build output ──
+/target/
+**/*.rs.bk
+*.profraw
+*.profdata
+
+# ── Secrets: never commit ──
+.env
+.env.*
+!.env.example
+.envrc
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+*.age
+*.gpg
+*.asc
+client_secret*.json
+credentials*.json
+*oauth-token*
+*refresh_token*
+*oauth*.json
+.cargo/credentials
+.cargo/credentials.toml
+.netrc
+.npmrc
+.pypirc
+
+# ── Local user data (sweeps, approvals, databases, reports, logs) ──
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+sweep*.json
+approved*.json
+report*.html
+*.log
+/logs/
+
+# ── Exports that may contain passwords or private mail ──
+/exports/
+/local/
+*.csv
+!tests/fixtures/**/*.csv
+*.1pux
+*.1pif
+*bitwarden*export*
+*password*export*
+*passwords*.json
+*.mbox
+*.eml
+*takeout*
+
+# ── Browser / automation artefacts (cookies, sessions, page captures) ──
+*.har
+/browser-profile/
+/chrome-profile/
+/.playwright/
+/screenshots/
+
+# ── Editors / OS ──
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Claude Code local settings ──
+.claude/settings.local.json
